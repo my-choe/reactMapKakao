@@ -1,24 +1,33 @@
 /*global kakao*/
 import React, { Component } from 'react';
-import jsonData from './map_info.json';
+import jsonData from "./map_info.json";
 
 class App extends Component { 
-
   componentDidMount() {
-      var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
-      mapOption = { 
-          center: new kakao.maps.LatLng(37.505496, 127.005116), // 지도의 중심좌표
-          level: 9 // 지도의 확대 레벨
-      };
-  
-    // 지도를 표시할 div와  지도 옵션으로  지도를 생성합니다
-    var map = new kakao.maps.Map(mapContainer, mapOption); 
+    var mapContainer = document.getElementById('map'),
+    mapOption = { 
+        center: new kakao.maps.LatLng(37.505496, 127.005116),
+        level: 9
+    }
+    var map = new kakao.maps.Map(mapContainer, mapOption)
 
-    for(var i = 0; i < jsonData.positions.length ; i++){
-      var position = jsonData.positions[i];
+    for(var i=0 ; i<jsonData.positions.length ; i++){
+      var position = jsonData.positions[i]
+
+      var imageSrc = require("./img/hop0"+(i+1)+".png")
+      if(position.finish == '완치'){
+          imageSrc = require("./img/clearp0"+(i+1)+".png")
+      }
+
+      var imageSize = new kakao.maps.Size(60, 70)
+      var imageOption = {offset: new kakao.maps.Point(27, 69)}
+      // ↑ 가로 값이 커지면 왼쪽, 세로 값이 커지면 위쪽으로 이미지 이동
+
+      var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
       var marker = new kakao.maps.Marker({
-        map: map,
-        position : new kakao.maps.LatLng(position.lat, position.lng),
+          map: map,
+          position : new kakao.maps.LatLng(position.lat, position.lng),
+          image: markerImage
       });
     }
   }
