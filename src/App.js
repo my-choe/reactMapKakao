@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import jsonData from "./map_info.json";
 import $ from 'jquery';
+import './App.css';
 
 class App extends Component { 
   componentDidMount() {
@@ -14,11 +15,12 @@ class App extends Component {
 
     var clusterer = new kakao.maps.MarkerClusterer({
       map: map,
-      averageCenter: true,  // 클러스터링되는 마커들의 중간 좌표에 클러스터링 마커가 표시됨
-      minLevel: 5 // 값이 클 수록 지도륵 더 많이 축소해야 클러스터링 기능 적용
+      averageCenter: true,
+      minLevel: 5
     });
 
     var markers = $(jsonData.positions).map(function(i, position) {
+
       var imageSrc = require("./img/hop0"+(i+1)+".png")
       if(position.finish == '완치'){
           imageSrc = require("./img/clearp0"+(i+1)+".png")
@@ -33,6 +35,63 @@ class App extends Component {
           position : new kakao.maps.LatLng(position.lat, position.lng),
           image: markerImage
       });
+
+      var content = '<div class="overlaybox">' +
+          '    <div class="boxtitle">'+position.num+'번째 확진자</div>' +
+          '    <div class="boxtitle2" style="margin-left: 150px;"><font color="white"">닫기 버튼 [X]</font></div>'+
+          '    <div class="first first_'+position.num+'">' +
+          '        <div class="triangle text">'+position.num+'</div>' +
+          '        <div class="movietitle text">'+position.comment+'</div>' +
+          '    </div>' +
+          '    <ul style = "overflow:scroll">' +
+          '        <li class="up">' +
+          '            <span class="number">격리:</span>' +
+          '            <span class="title" style="font-weight:bold;color:white">'+position.date+'</span>' +
+          '            <span class="number">완치:</span>' +
+          '            <span class="title" style="font-weight:bold;color:white">'+position.finish_date+'</span>' +
+          '        </li>' +
+          '        <li class="up">' +
+          '            <span class="number">성별:</span>' +
+          '            <span class="title" style="font-weight:bold;color:white">'+position.gender+'</span>' +
+          '            <span class="number">생년:</span>' +
+          '            <span class="title" style="font-weight:bold;color:white">'+position.birth+'</span>' +
+          '            <span class="number">국적:</span>' +
+          '            <span class="title" style="font-weight:bold;color:white">'+position.nation+'</span>' +
+          '        </li>' +
+          '        <li class="up">' +
+          '            <span class="number">접속자수:</span>' +
+          '            <span class="title" style="font-weight:bold;color:white">'+position.contact+'</span>' +
+          '            <span class="number">격리조치중:</span>' +
+          '            <span class="title" style="font-weight:bold;color:white">'+position.Isolation+'</span>' +
+          '        </li>' +
+          '    </ul>' +
+          '</div>';
+      
+      var lat = Number(position.lat)
+      var lng = Number(position.lng)
+      var lat_string = lat.toString()
+      var lng_string = lng.toString()
+      
+      // xAnchor, yAnchor는 각각 팝업의 x,y축 위치를 의미하며 0~1 값을 가짐. 기본값 0.5
+      var customOverlay = new kakao.maps.CustomOverlay({
+          position: new kakao.maps.LatLng(lat_string, lng_string), 
+          content: content,
+          xAnchor: 0.25,
+          yAnchor: 0.95
+      });
+
+      var clickHandler1 = function(event) {
+          customOverlay.setMap(map);
+
+          $(".boxtitle2").click(function(){
+            customOverlay.setMap(null);
+          });
+
+          $(".first_"+position.num).css({"background":"url("+position.hospi_img+")",
+          "background-size" :"247px 247px"}); 	
+      }; 
+
+      kakao.maps.event.addListener(marker, 'click', clickHandler1)
       return marker;
     })
     clusterer.addMarkers(markers);
